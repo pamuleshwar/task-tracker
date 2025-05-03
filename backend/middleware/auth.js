@@ -37,5 +37,5 @@ export const authentication = async (req, res, next) => {
   }catch(err){
       console.log(err.message);
       res.status(400).send("Unauthorized user");
-  }
+}
 }

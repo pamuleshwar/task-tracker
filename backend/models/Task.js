@@ -44,5 +44,4 @@ TaskSchema.pre('save', function(next) {
   next();
 });
 
-// Export the model using ESM syntax
 export const Task = mongoose.model('Task', TaskSchema);
