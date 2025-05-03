@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import TaskForm from './TaskForm';
 import { format } from 'date-fns';
+import axios from 'axios';
+import { BASE_URL } from '../../constant';
 
-export default function TaskCard({ task, onUpdate, onDelete }) {
+const TaskCard = ({ task, onUpdate, onDelete, loading }) => {
   const [showEditForm, setShowEditForm] = useState(false);
 
   const handleStatusChange = async (newStatus) => {
     try {
-      await onUpdate(task._id, { status: newStatus });
+      const response = await axios.put(`${BASE_URL}/tasks/${task?._id}`,{status : newStatus}, {withCredentials : true});
+
+      // console.log(response?.data?.data);
     } catch (err) {
       console.error('Failed to update task status:', err);
     }
@@ -16,7 +20,8 @@ export default function TaskCard({ task, onUpdate, onDelete }) {
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this task?')) {
       try {
-        await onDelete(task._id);
+        const response = await axios.delete(`${BASE_URL}/tasks/${task?._id}`,{withCredentials : true});
+        console.log(response?.data);
       } catch (err) {
         console.error('Failed to delete task:', err);
       }
@@ -24,7 +29,7 @@ export default function TaskCard({ task, onUpdate, onDelete }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
       {showEditForm && (
         <TaskForm
           task={task}
@@ -33,6 +38,7 @@ export default function TaskCard({ task, onUpdate, onDelete }) {
             onUpdate(task._id, taskData);
             setShowEditForm(false);
           }}
+          loading={loading}
         />
       )}
       <div className="p-6">
@@ -64,31 +70,34 @@ export default function TaskCard({ task, onUpdate, onDelete }) {
         <div className="flex flex-wrap gap-2 mb-4">
           <button
             onClick={() => handleStatusChange('todo')}
+            disabled={loading}
             className={`px-3 py-1 text-xs rounded ${
               task.status === 'todo'
                 ? 'bg-blue-500 text-white'
                 : 'bg-gray-200 text-gray-700'
-            }`}
+            } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             To Do
           </button>
           <button
             onClick={() => handleStatusChange('in-progress')}
+            disabled={loading}
             className={`px-3 py-1 text-xs rounded ${
               task.status === 'in-progress'
                 ? 'bg-yellow-500 text-white'
                 : 'bg-gray-200 text-gray-700'
-            }`}
+            } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             In Progress
           </button>
           <button
             onClick={() => handleStatusChange('completed')}
+            disabled={loading}
             className={`px-3 py-1 text-xs rounded ${
               task.status === 'completed'
                 ? 'bg-green-500 text-white'
                 : 'bg-gray-200 text-gray-700'
-            }`}
+            } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             Completed
           </button>
@@ -96,13 +105,19 @@ export default function TaskCard({ task, onUpdate, onDelete }) {
         <div className="flex justify-end space-x-2">
           <button
             onClick={() => setShowEditForm(true)}
-            className="text-blue-500 hover:text-blue-700"
+            disabled={loading}
+            className={`text-blue-500 hover:text-blue-700 ${
+              loading ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             Edit
           </button>
           <button
             onClick={handleDelete}
-            className="text-red-500 hover:text-red-700"
+            disabled={loading}
+            className={`text-red-500 hover:text-red-700 ${
+              loading ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             Delete
           </button>
@@ -110,4 +125,6 @@ export default function TaskCard({ task, onUpdate, onDelete }) {
       </div>
     </div>
   );
-}
+};
+
+export default TaskCard;
